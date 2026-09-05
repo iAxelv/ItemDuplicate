@@ -50,6 +50,11 @@ public final class GroundItemService {
         }
 
         Material heldMaterial = heldItem.getType();
+        Material fluidMaterial = getFluidMaterial(heldMaterial);
+        if (fluidMaterial != null) {
+            groundBlock.setType(fluidMaterial, false);
+            return;
+        }
 
         if (heldMaterial.isBlock()) {
             if (groundBlock.getType() != heldMaterial) {
@@ -69,5 +74,13 @@ public final class GroundItemService {
         droppedItem.setAmount(1);
         Location dropLocation = groundBlock.getLocation().add(0.5, 0.5, 0.5);
         groundBlock.getWorld().dropItemNaturally(dropLocation, droppedItem);
+    }
+
+    private Material getFluidMaterial(Material heldMaterial) {
+        return switch (heldMaterial) {
+            case WATER_BUCKET -> Material.WATER;
+            case LAVA_BUCKET -> Material.LAVA;
+            default -> null;
+        };
     }
 }

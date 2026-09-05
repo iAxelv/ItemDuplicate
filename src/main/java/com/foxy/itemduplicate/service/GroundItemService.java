@@ -17,6 +17,7 @@ public final class GroundItemService {
 
     private final JavaPlugin plugin;
     private final Map<UUID, BukkitTask> pendingActions = new HashMap<>();
+    private final Map<UUID, Location> lastActionTargets = new HashMap<>();
     private final long delayTicks;
 
     public GroundItemService(JavaPlugin plugin) {
@@ -24,17 +25,22 @@ public final class GroundItemService {
         this.delayTicks = Math.max(0L, plugin.getConfig().getLong("action-delay-ticks", 10L));
     }
 
-    public void scheduleGroundAction(Player player) {
+    public void scheduleGroundAction(Player player, Location targetLocation) {
         UUID playerId = player.getUniqueId();
+        Location actionTarget = targetLocation.getBlock().getLocation();
+        if (actionTarget.equals(lastActionTargets.get(playerId))) {
+            return;
+        }
+
         if (pendingActions.containsKey(playerId)) {
             return;
         }
 
-        Location targetLocation = player.getLocation().getBlock().getLocation();
+        lastActionTargets.put(playerId, actionTarget);
         ItemStack heldItem = player.getInventory().getItemInMainHand().clone();
         BukkitTask task = Bukkit.getScheduler().runTaskLater(plugin, () -> {
             pendingActions.remove(playerId);
-            applyGroundAction(player, targetLocation, heldItem);
+            applyGroundAction(player, actionTarget, heldItem);
         }, delayTicks);
         pendingActions.put(playerId, task);
     }

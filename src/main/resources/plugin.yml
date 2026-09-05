@@ -1,0 +1,6 @@
+name: ItemDuplicate
+version: '${version}'
+
+main: com.foxy.itemduplicate.ItemDuplicate
+api-version: '1.21.8'
+load: POSTWORLD
